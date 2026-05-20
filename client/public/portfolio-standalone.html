@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Divyanshi Vashistha — AI × Systems × Product</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+/* ══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════════════════════ */
+:root {
+  /* Backgrounds */
+  --bg-deep:    #060810;
+  --bg-base:    #090c18;
+  --bg-surface: #0d1120;
+  --bg-card:    #101622;
+  --bg-raised:  #141c2a;
+  --bg-hover:   #18202e;
+
+  /* Neon palette */
+  --green:      #00ff88;
+  --cyan:       #00e5ff;
+  --purple:     #bf00ff;
+  --amber:      #ffaa00;
+  --red:        #ff4466;
+  --pink:       #ff0080;
+
+  /* Alpha fills */
+  --green-04:   rgba(0,255,136,0.04);
+  --green-08:   rgba(0,255,136,0.08);
+  --green-14:   rgba(0,255,136,0.14);
+  --green-glow: rgba(0,255,136,0.30);
+  --cyan-08:    rgba(0,229,255,0.08);
+  --cyan-glow:  rgba(0,229,255,0.25);
+
+  /* Text */
+  --t1: #dff7ec;
+  --t2: #6fac8a;
+  --t3: #365248;
+  --t4: #1b2e24;
+
+  /* Borders */
+  --b-neon:   rgba(0,255,136,0.38);
+  --b-mid:    rgba(0,255,136,0.18);
+  --b-subtle: rgba(0,255,136,0.10);
+  --b-cyan:   rgba(0,229,255,0.28);
+
+  /* Fonts — THE LAW
+     --f-ui   = Space Grotesk   → headings, nav, CTAs, section labels, card titles
+     --f-mono = IBM Plex Mono   → terminal, code, tags, paths, body copy in terminal */
+  --f-ui:   'Space Grotesk', system-ui, sans-serif;
+  --f-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+  /* Glows */
+  --glow-xs: 0 0 6px var(--green-glow);
+  --glow-sm: 0 0 12px var(--green-glow);
+  --glow-md: 0 0 24px var(--green-glow), 0 0 48px rgba(0,255,136,0.10);
+  --glow-cy: 0 0 14px var(--cyan-glow);
+
+  /* Motion */
+  --ease:   cubic-bezier(0.4,0,0.2,1);
+  --t-fast: 0.15s;
+  --t-mid:  0.25s;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--f-mono);
+  background: var(--bg-deep);
+  color: var(--green);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Grid backdrop */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,255,136,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.025) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none;
+}
+
+/* Scanlines */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px, transparent 2px,
+    rgba(0,255,136,0.012) 2px, rgba(0,255,136,0.012) 3px
+  );
+  pointer-events: none;
+  animation: scan 10s linear infinite;
+}
+@keyframes scan { to { background-position: 0 120px; } }
+
+::selection { background: rgba(0,255,136,0.18); color: var(--green); }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--b-subtle); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--b-neon); }
+
+/* ══════════════════════════════════════════════════════════
+   NAVBAR
+══════════════════════════════════════════════════════════ */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  height: 46px;
+  background: rgba(6,8,16,0.92);
+  backdrop-filter: blur(24px) saturate(1.4);
+  border-bottom: 1px solid var(--b-subtle);
+  display: flex; align-items: center;
+  padding: 0 28px; gap: 14px;
+}
+
+.nav-brand {
+  font-family: var(--f-mono);
+  font-size: 12.5px; color: var(--green);
+  text-shadow: var(--glow-xs); letter-spacing: 0.04em;
+  flex-shrink: 0; white-space: nowrap;
+}
+.nav-brand em { color: var(--t2); font-style: normal; }
+
+.nav-sep { width: 1px; height: 18px; background: var(--b-subtle); flex-shrink: 0; }
+
+.nav-links {
+  list-style: none; flex: 1;
+  display: flex; align-items: center; gap: 2px;
+  justify-content: flex-end;
+}
+
+/* Nav labels: Space Grotesk */
+.nav-links a {
+  font-family: var(--f-ui);
+  font-size: 12px; font-weight: 500;
+  color: var(--t2); text-decoration: none;
+  padding: 5px 12px; border-radius: 4px;
+  letter-spacing: 0.02em;
+  transition: color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+}
+.nav-links a:hover { color: var(--green); background: var(--green-08); text-shadow: var(--glow-xs); }
+
+/* Nav numbers: IBM Plex Mono */
+.nav-links a .nn {
+  font-family: var(--f-mono);
+  font-size: 10px; color: var(--cyan);
+  margin-right: 4px; letter-spacing: 0;
+}
+
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green), 0 0 18px rgba(0,255,136,0.35);
+  flex-shrink: 0;
+  animation: breathe 2.4s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.55;transform:scale(0.82)} }
+
+.hamburger {
+  display: none; flex-direction: column; gap: 5px;
+  cursor: pointer; background: none; border: none; padding: 4px;
+}
+.hamburger span { display: block; width: 20px; height: 1.5px; background: var(--green); }
+
+/* ══════════════════════════════════════════════════════════
+   PAGE WRAPPER
+══════════════════════════════════════════════════════════ */
+.page { padding-top: 46px; position: relative; z-index: 1; }
+
+.wrap { max-width: 1260px; margin: 0 auto; padding: 0 28px; }
+
+/* ══════════════════════════════════════════════════════════
+   WINDOW CHROME (reusable)
+══════════════════════════════════════════════════════════ */
+.win {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--b-neon);
+  border-radius: 7px; overflow: hidden;
+}
+.win.dim  { border-color: var(--b-mid); box-shadow: 0 2px 32px rgba(0,0,0,0.45), inset 0 0 20px rgba(0,255,136,0.015); }
+.win.glow { box-shadow: var(--glow-md), inset 0 0 30px rgba(0,255,136,0.025); }
+
+.chrome {
+  background: linear-gradient(90deg, #0f1526 0%, #090c18 100%);
+  border-bottom: 1px solid var(--b-subtle);
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.dots { display: flex; gap: 7px; }
+.dot { width: 11px; height: 11px; border-radius: 50%; transition: filter var(--t-fast); }
+.dot:hover { filter: brightness(1.25); }
+.dot.r { background: #ff5f57; box-shadow: 0 0 5px rgba(255,95,87,0.5); }
+.dot.y { background: #febc2e; box-shadow: 0 0 5px rgba(254,188,46,0.5); }
+.dot.g { background: #28c840; box-shadow: 0 0 5px rgba(40,200,64,0.5); }
+
+/* Chrome title: IBM Plex Mono */
+.chrome-title {
+  flex: 1; text-align: center;
+  font-family: var(--f-mono); font-size: 11.5px;
+  color: var(--t2); letter-spacing: 0.06em;
+}
+.chrome-badge { font-family: var(--f-mono); font-size: 10px; color: var(--t3); }
+
+/* ══════════════════════════════════════════════════════════
+   HERO
+   ENFORCED 2-COLUMN HORIZONTAL SPLIT
+   LEFT col = 280px (photo)   RIGHT col = 1fr (bio)
+   grid-template-columns is NEVER changed above 640px
+══════════════════════════════════════════════════════════ */
+.hero-section { padding: 26px 0 18px; }
+
+.hero-split {
+  display: grid;
+  grid-template-columns: 280px 1fr; /* hard — never collapses above 640px */
+  min-height: 350px;
+}
+
+/* LEFT: Photo */
+.hero-photo {
+  display: flex; align-items: center; justify-content: center;
+  padding: 28px 24px;
+  border-right: 1px solid var(--b-subtle);
+  background: linear-gradient(150deg, rgba(0,255,136,0.03) 0%, transparent 55%);
+  flex-shrink: 0;
+}
+
+.photo-wrap { position: relative; width: 196px; }
+
+/* IBM Plex Mono for path labels */
+.photo-label {
+  font-family: var(--f-mono);
+  font-size: 9.5px; color: var(--t3);
+  letter-spacing: 0.06em; margin-bottom: 8px;
+}
+
+.photo-box {
+  width: 196px; height: 254px;
+  border: 1.5px solid var(--b-neon);
+  border-radius: 4px; overflow: hidden;
+  background: var(--bg-card); position: relative;
+  animation: framePulse 3.5s ease-in-out infinite;
+}
+@keyframes framePulse {
+  0%,100% { box-shadow:0 0 14px rgba(0,255,136,0.30); border-color:rgba(0,255,136,0.38); }
+  50%      { box-shadow:0 0 28px rgba(0,255,136,0.55),0 0 56px rgba(0,255,136,0.12); border-color:rgba(0,255,136,0.65); }
+}
+
+.photo-interior {
+  width: 100%; height: 100%;
+  background: linear-gradient(155deg,#0c2018 0%,#081510 50%,#050f0a 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+  position: relative; overflow: hidden;
+}
+.photo-interior::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 38%,rgba(0,255,136,0.11) 0%,transparent 68%);
+}
+.photo-interior::after {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,0.035) 2px,rgba(0,255,136,0.035) 3px);
+  pointer-events:none;
+}
+
+.photo-avatar {
+  width:84px; height:84px; border-radius:50%;
+  background:linear-gradient(135deg,rgba(0,255,136,0.18),rgba(0,229,255,0.08));
+  border:1.5px solid var(--b-neon);
+  box-shadow:0 0 22px var(--green-glow);
+  display:flex; align-items:center; justify-content:center;
+  font-size:38px; position:relative; z-index:1;
+}
+.photo-hint {
+  font-family:var(--f-mono); font-size:9px;
+  color:var(--t3); text-align:center; line-height:1.6;
+  position:relative; z-index:1;
+}
+
+.photo-status {
+  position:absolute; bottom:0; left:0; right:0;
+  background:rgba(0,255,136,0.06);
+  border-top:1px solid var(--b-subtle);
+  padding:7px 12px;
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--f-mono); font-size:9.5px; color:var(--green);
+}
+.blink-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--green); box-shadow:0 0 6px var(--green);
+  animation:blink 1.1s step-end infinite; flex-shrink:0;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* RIGHT: Bio */
+.hero-bio {
+  display: flex; flex-direction: column;
+  justify-content: center;
+  padding: 32px 40px; gap: 0;
+}
+
+/* Breadcrumb: IBM Plex Mono */
+.bio-crumb {
+  font-family: var(--f-mono); font-size: 11px;
+  color: var(--cyan); letter-spacing: 0.04em;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.bio-crumb .pr { color: var(--green); }
+
+/* Name: Space Grotesk heading */
+.bio-name {
+  font-family: var(--f-ui);
+  font-size: 38px; font-weight: 700;
+  color: var(--green); letter-spacing: -0.025em;
+  line-height: 1.08; text-shadow: var(--glow-xs);
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.cursor-block {
+  display: inline-block; width: 3px; height: 42px;
+  background: var(--green); box-shadow: 0 0 8px var(--green);
+  animation: blink 0.95s step-end infinite;
+  vertical-align: middle; flex-shrink: 0;
+}
+
+/* Tagline: Space Grotesk */
+.bio-tagline {
+  font-family: var(--f-ui);
+  font-size: 13px; font-weight: 500;
+  color: var(--cyan); letter-spacing: 0.16em;
+  text-shadow: var(--glow-cy); text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.bio-tagline .x { color: var(--t3); margin: 0 6px; }
+
+/* Body copy: IBM Plex Mono */
+.bio-desc {
+  font-family: var(--f-mono); font-size: 12.5px;
+  color: var(--t2); line-height: 1.82;
+  max-width: 500px; margin-bottom: 16px;
+}
+
+/* Open-to-work badge: Space Grotesk label */
+.otw {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--f-ui); font-size: 11px; font-weight: 500;
+  color: var(--green);
+  background: rgba(0,255,136,0.06);
+  border: 1px solid rgba(0,255,136,0.18);
+  border-radius: 20px; padding: 4px 12px;
+  letter-spacing: 0.04em; margin-bottom: 22px;
+  width: fit-content;
+}
+
+/* CTAs: Space Grotesk buttons */
+.cta-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.btn {
+  font-family: var(--f-ui);
+  font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 4px;
+  cursor: pointer; text-decoration: none; border: 1.5px solid;
+  transition: all var(--t-mid) var(--ease); white-space: nowrap;
+}
+.btn-primary { background:rgba(0,255,136,0.10); border-color:var(--green); color:var(--green); }
+.btn-primary:hover { background:rgba(0,255,136,0.18); box-shadow:var(--glow-sm); transform:translateY(-1px); }
+.btn-sec { background:transparent; border-color:var(--b-mid); color:var(--t2); }
+.btn-sec:hover { border-color:var(--b-neon); color:var(--green); background:var(--green-08); }
+.btn-ghost { background:transparent; border-color:var(--b-cyan); color:var(--cyan); }
+.btn-ghost:hover { background:var(--cyan-08); border-color:var(--cyan); box-shadow:var(--glow-cy); }
+
+/* ══════════════════════════════════════════════════════════
+   TERMINAL / TABS SECTION
+══════════════════════════════════════════════════════════ */
+.terminal-section { padding: 0 0 18px; }
+
+.tab-bar {
+  background: var(--bg-base);
+  border-bottom: 1px solid var(--b-subtle);
+  display: flex; align-items: center;
+  padding: 0 16px; min-height: 40px; gap: 0;
+}
+.tab-bar .dots { margin-right: 12px; }
+
+/* Tab labels: Space Grotesk */
+.tab {
+  font-family: var(--f-ui); font-size: 11.5px; font-weight: 500;
+  color: var(--t3); padding: 9px 14px;
+  cursor: pointer; border-bottom: 2px solid transparent;
+  transition: color var(--t-fast) var(--ease);
+  letter-spacing: 0.03em; white-space: nowrap; user-select: none;
+}
+.tab:hover { color: var(--t2); }
+.tab.on { color: var(--green); border-bottom-color: var(--green); text-shadow: var(--glow-xs); }
+.tab-pip { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--amber); margin-left:6px; vertical-align:middle; }
+
+/* Terminal 3-col grid */
+.term-grid {
+  display: grid;
+  grid-template-columns: 220px 190px 1fr;
+  min-height: 248px;
+}
+.term-pane { border-right: 1px solid var(--b-subtle); }
+.term-pane:last-child { border-right: none; }
+
+/* Pane headers: IBM Plex Mono paths */
+.pane-head {
+  font-family: var(--f-mono); font-size: 9.5px;
+  color: var(--t3); letter-spacing: 0.10em; text-transform: uppercase;
+  padding: 8px 16px; background: var(--bg-base);
+  border-bottom: 1px solid var(--b-subtle);
+}
+
+.pane-body {
+  padding: 14px 16px; font-size: 11.5px;
+  overflow-y: auto; height: 206px;
+  scrollbar-width: thin; scrollbar-color: var(--b-subtle) transparent;
+}
+
+/* Terminal text — IBM Plex Mono exclusively */
+.t-p  { font-family:var(--f-mono); color:var(--green); }
+.t-c  { font-family:var(--f-mono); color:var(--cyan);  }
+.t-o  { font-family:var(--f-mono); color:var(--t2);  padding-left:6px; display:block; }
+.t-k  { font-family:var(--f-mono); color:var(--amber); }
+.t-v  { font-family:var(--f-mono); color:var(--t1);  }
+.t-d  { font-family:var(--f-mono); color:var(--t3);  }
+.t-ln { display:block; line-height:1.75; }
+.t-sp { display:block; height:6px; }
+
+/* Command buttons */
+.cmd-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--green-04);
+  border: 1px solid rgba(0,255,136,0.12);
+  border-radius: 3px; padding: 5px 11px;
+  cursor: pointer; width: 100%; text-align: left;
+  transition: all var(--t-fast) var(--ease); margin-bottom: 5px;
+}
+.cmd-btn:last-child { margin-bottom: 0; }
+.cmd-btn:hover { background:var(--green-14); border-color:var(--b-neon); transform:translateX(3px); }
+/* $ sign: IBM Plex Mono */
+.cmd-btn .sign { font-family:var(--f-mono); font-size:11px; color:var(--green); }
+/* label: Space Grotesk */
+.cmd-btn .lbl  { font-family:var(--f-ui); font-size:11px; font-weight:500; color:var(--t2); }
+.cmd-btn:hover .lbl { color:var(--green); }
+
+/* Terminal output */
+#termOutput {
+  height: 192px; overflow-y: auto;
+  font-family: var(--f-mono); font-size: 11px; line-height: 1.75;
+  scrollbar-width: thin; scrollbar-color: var(--b-subtle) transparent;
+  padding: 14px 16px 8px;
+}
+#termOutput pre { font-family:var(--f-mono); white-space:pre-wrap; font-size:11px; line-height:1.75; }
+
+.term-input-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 16px;
+  border-top: 1px solid var(--b-subtle);
+  background: var(--bg-base);
+}
+/* Prompt: IBM Plex Mono */
+.term-input-row .prmt { font-family:var(--f-mono); font-size:11.5px; color:var(--green); white-space:nowrap; flex-shrink:0; }
+#termInput {
+  flex: 1; background:transparent; border:none; outline:none;
+  font-family:var(--f-mono); font-size:11.5px; color:var(--t1);
+  caret-color:var(--green); min-width:0;
+}
+#termInput::placeholder { color:var(--t4); }
+.term-cursor { width:7px; height:14px; background:var(--green); box-shadow:0 0 6px var(--green); animation:blink 0.95s step-end infinite; flex-shrink:0; }
+
+/* Skills tab */
+.skills-pane { display:none; padding:22px 24px; }
+.skills-pane.on { display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px; }
+
+/* Skill group heading: Space Grotesk */
+.sk-head { font-family:var(--f-ui); font-size:11px; font-weight:600; color:var(--t2); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:14px; }
+.sk-row { display:flex; align-items:center; gap:9px; margin-bottom:8px; }
+/* Skill labels: IBM Plex Mono */
+.sk-lbl { font-family:var(--f-mono); font-size:10px; color:var(--t2); width:86px; flex-shrink:0; }
+.sk-track { flex:1; height:3px; background:rgba(0,255,136,0.08); border-radius:2px; overflow:hidden; }
+.sk-fill { height:100%; background:linear-gradient(90deg,var(--green),var(--cyan)); border-radius:2px; box-shadow:0 0 4px var(--green-glow); animation:fillBar 1s 0.3s var(--ease) both; transform-origin:left; }
+@keyframes fillBar { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+.sk-pct { font-family:var(--f-mono); font-size:9px; color:var(--t3); width:26px; text-align:right; }
+
+/* Exp / edu tabs */
+.exp-pane { display:none; padding:20px 24px; }
+.exp-pane.on { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.edu-pane { display:none; padding:20px 24px; }
+.edu-pane.on { display:flex; flex-direction:column; gap:10px; max-width:640px; }
+
+.exp-card {
+  background:var(--bg-card); border:1px solid var(--b-subtle);
+  border-left:2px solid var(--green); border-radius:4px;
+  padding:14px 16px;
+  transition:border-color var(--t-mid), box-shadow var(--t-mid);
+}
+.exp-card:hover { border-color:var(--b-neon); box-shadow:var(--glow-xs); }
+/* Card headings: Space Grotesk */
+.exp-role   { font-family:var(--f-ui); font-size:13px; font-weight:600; color:var(--green); margin-bottom:3px; }
+.exp-org    { font-family:var(--f-ui); font-size:11px; font-weight:500; color:var(--cyan); margin-bottom:4px; }
+/* Dates and body: IBM Plex Mono */
+.exp-period { font-family:var(--f-mono); font-size:10px; color:var(--t3); margin-bottom:8px; }
+.exp-desc   { font-family:var(--f-mono); font-size:10.5px; color:var(--t2); line-height:1.65; }
+
+/* ══════════════════════════════════════════════════════════
+   SECTION HEADERS
+══════════════════════════════════════════════════════════ */
+.sec-head { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+/* "// label" in IBM Plex Mono */
+.sec-label { font-family:var(--f-mono); font-size:9.5px; color:var(--cyan); letter-spacing:0.14em; text-transform:uppercase; text-shadow:var(--glow-cy); white-space:nowrap; }
+/* Section titles in Space Grotesk */
+.sec-title { font-family:var(--f-ui); font-size:15px; font-weight:600; color:var(--green); text-shadow:var(--glow-xs); }
+.sec-line { flex:1; height:1px; background:linear-gradient(90deg,var(--b-subtle),transparent); }
+/* Path hints: IBM Plex Mono */
+.sec-hint { font-family:var(--f-mono); font-size:9.5px; color:var(--t3); white-space:nowrap; }
+
+/* ══════════════════════════════════════════════════════════
+   PROJECTS
+══════════════════════════════════════════════════════════ */
+.proj-section { padding: 0 0 18px; }
+.proj-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+
+.proj-card {
+  background:var(--bg-card); border:1px solid var(--b-subtle);
+  border-radius:5px; padding:18px;
+  cursor:pointer; position:relative; overflow:hidden;
+  transition:all var(--t-mid) var(--ease);
+}
+.proj-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,var(--green),var(--cyan));
+  transform:scaleX(0); transform-origin:left;
+  transition:transform var(--t-mid) var(--ease);
+}
+.proj-card:hover { border-color:var(--b-neon); background:var(--bg-raised); transform:translateY(-2px); box-shadow:0 10px 32px rgba(0,0,0,0.35),var(--glow-xs); }
+.proj-card:hover::before { transform:scaleX(1); }
+
+/* Project number: IBM Plex Mono */
+.proj-num { font-family:var(--f-mono); font-size:9.5px; color:var(--cyan); opacity:0.7; margin-bottom:8px; letter-spacing:0.06em; }
+/* Project name: Space Grotesk heading */
+.proj-name { font-family:var(--f-ui); font-size:13.5px; font-weight:700; color:var(--green); text-shadow:var(--glow-xs); margin-bottom:8px; letter-spacing:0.02em; }
+/* Description: IBM Plex Mono */
+.proj-desc { font-family:var(--f-mono); font-size:10.5px; color:var(--t2); line-height:1.7; margin-bottom:12px; }
+.proj-tags { display:flex; flex-wrap:wrap; gap:5px; }
+
+/* Tags: IBM Plex Mono */
+.tag { font-family:var(--f-mono); font-size:9px; padding:2px 8px; border-radius:2px; letter-spacing:0.04em; }
+.tag-g { background:rgba(0,255,136,0.07); color:var(--green); border:1px solid rgba(0,255,136,0.14); }
+.tag-c { background:rgba(0,229,255,0.07); color:var(--cyan);  border:1px solid rgba(0,229,255,0.14); }
+.tag-p { background:rgba(191,0,255,0.07); color:var(--purple);border:1px solid rgba(191,0,255,0.14); }
+.tag-a { background:rgba(255,170,0,0.07); color:var(--amber); border:1px solid rgba(255,170,0,0.14); }
+
+.proj-arrow { position:absolute; top:14px; right:14px; font-size:13px; color:var(--t3); transition:all var(--t-mid) var(--ease); }
+.proj-card:hover .proj-arrow { color:var(--green); transform:translate(2px,-2px); }
+
+.proj-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height:130px; border-style:dashed; }
+.proj-empty .plus { font-size:22px; opacity:0.35; margin-bottom:8px; color:var(--green); }
+.proj-empty a { font-family:var(--f-ui); font-size:11px; font-weight:500; color:var(--cyan); text-decoration:none; margin-top:4px; transition:text-shadow var(--t-fast); }
+.proj-empty a:hover { text-shadow:var(--glow-cy); }
+
+/* ══════════════════════════════════════════════════════════
+   EXPERIENCE
+══════════════════════════════════════════════════════════ */
+.exp-section { padding: 0 0 18px; }
+.exp-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+/* ══════════════════════════════════════════════════════════
+   FOOTER — ENFORCED 3-COL HORIZONTAL PANEL
+   Spotify | Letterboxd | StoryGraph
+   grid-template-columns: 1fr 1fr 1fr — NEVER changed above 640px
+   Columns only stack when viewport < 640px
+══════════════════════════════════════════════════════════ */
+.footer {
+  margin-top: 10px;
+  border-top: 1px solid var(--b-subtle);
+  background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-deep) 100%);
+  position: relative; z-index: 1;
+}
+
+/* Meta strip */
+.footer-top {
+  max-width: 1260px; margin: 0 auto; padding: 14px 28px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--b-subtle);
+}
+.footer-brand { font-family:var(--f-mono); font-size:10px; color:var(--t3); letter-spacing:0.12em; white-space:nowrap; }
+.footer-rule  { flex:1; height:1px; background:linear-gradient(90deg,var(--b-subtle),transparent); }
+.footer-tip   { font-family:var(--f-mono); font-size:10px; color:var(--t3); white-space:nowrap; }
+.footer-tip em { color:var(--cyan); font-style:normal; }
+.footer-rule2 { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--b-subtle)); }
+.footer-code  { font-family:var(--f-ui); font-size:10px; font-weight:500; color:var(--t3); white-space:nowrap; }
+
+/* ─── 3-COL MEDIA PANEL ─── */
+.footer-media {
+  max-width: 1260px; margin: 0 auto; padding: 20px 28px;
+
+  /* THREE equal columns — this declaration is authoritative on desktop */
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  align-items: start;
+}
+
+.media-col {
+  padding: 0 24px;
+  border-right: 1px solid var(--b-subtle);
+  min-width: 0; /* prevent blowout */
+}
+.media-col:first-child { padding-left: 0; }
+.media-col:last-child  { border-right: none; padding-right: 0; }
+
+/* Section headings: Space Grotesk */
+.media-col-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+}
+.media-col-head-text {
+  font-family: var(--f-ui);
+  font-size: 12px; font-weight: 700;
+  color: var(--green); letter-spacing: 0.04em; text-transform: uppercase;
+}
+.media-icon { font-size: 15px; flex-shrink: 0; }
+
+/* Media items */
+.mi {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 8px; border-radius: 4px; cursor: pointer;
+  transition: background var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+  min-width: 0;
+}
+.mi:hover { background: var(--green-04); transform: translateX(2px); }
+
+.mi-cover {
+  width: 38px; height: 38px; border-radius: 4px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+/* Spotify cover gradients */
+.mc-s1 { background:linear-gradient(135deg,#e63950,#6b1020); }
+.mc-s2 { background:linear-gradient(135deg,#f7a800,#7a5200); }
+.mc-s3 { background:linear-gradient(135deg,#00b0e0,#004d62); }
+.mc-s4 { background:linear-gradient(135deg,#7c4dff,#2d0070); }
+/* Letterboxd cover gradients */
+.mc-l1 { background:linear-gradient(135deg,#c4a052,#5c4010); }
+.mc-l2 { background:linear-gradient(135deg,#8b3a3a,#3a1010); }
+.mc-l3 { background:linear-gradient(135deg,#4a7abf,#1a2f50); }
+.mc-l4 { background:linear-gradient(135deg,#556655,#1a221a); }
+/* StoryGraph cover gradients */
+.mc-b1 { background:linear-gradient(135deg,#00cc70,#005530); }
+.mc-b2 { background:linear-gradient(135deg,#e8b87a,#7a5030); }
+.mc-b3 { background:linear-gradient(135deg,#60a0e0,#1a3a60); }
+
+.mi-info { flex:1; overflow:hidden; min-width:0; }
+/* Track/film/book titles: Space Grotesk */
+.mi-title { font-family:var(--f-ui); font-size:11.5px; font-weight:500; color:var(--t1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:2px; }
+/* Meta text: IBM Plex Mono */
+.mi-meta  { font-family:var(--f-mono); font-size:9.5px; color:var(--t3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.mi-play  { font-family:var(--f-mono); font-size:10px; color:var(--t3); flex-shrink:0; }
+.mi-stars { font-size:9px; color:var(--amber); flex-shrink:0; }
+.mi-pct   { font-family:var(--f-mono); font-size:9.5px; color:#8b5cf6; flex-shrink:0; }
+
+/* Book progress bar */
+.bk-bar  { height:2px; border-radius:2px; background:rgba(139,92,246,0.14); margin-top:4px; overflow:hidden; }
+.bk-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,#8b5cf6,#a78bfa); }
+
+/* Neon hairline between items */
+.neon-hr { height:1px; margin:7px 0; background:linear-gradient(90deg,transparent,var(--b-subtle),transparent); }
+
+/* Bottom bar */
+.footer-bottom {
+  max-width:1260px; margin:0 auto; padding:12px 28px 22px;
+  border-top:1px solid var(--b-subtle);
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:10px;
+}
+.footer-copy  { font-family:var(--f-mono); font-size:10px; color:var(--t3); }
+.footer-links { display:flex; gap:18px; flex-wrap:wrap; }
+/* Footer links: Space Grotesk */
+.footer-link  { font-family:var(--f-ui); font-size:11px; font-weight:500; color:var(--cyan); text-decoration:none; display:flex; align-items:center; gap:5px; transition:color var(--t-fast),text-shadow var(--t-fast); }
+.footer-link:hover { color:var(--green); text-shadow:var(--glow-xs); }
+
+/* ══════════════════════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════════════════════ */
+.appear { animation:appear 0.5s var(--ease) both; }
+.ap1 { animation-delay:0.06s; }
+.ap2 { animation-delay:0.12s; }
+.ap3 { animation-delay:0.18s; }
+@keyframes appear { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.win-enter { animation:winIn 0.55s var(--ease) both; }
+@keyframes winIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE
+   Hero 2-col → stacks below 640px
+   Footer 3-col → stacks below 640px
+   Both preserve horizontal layout on all wider viewports
+══════════════════════════════════════════════════════════ */
+@media (max-width: 1060px) {
+  .proj-grid { grid-template-columns:1fr 1fr; }
+}
+@media (max-width: 840px) {
+  .term-grid { grid-template-columns:1fr 1fr; }
+  .exp-grid  { grid-template-columns:1fr; }
+  .exp-pane.on { grid-template-columns:1fr; }
+}
+@media (max-width: 640px) {
+  /* Hero: ONLY HERE does 2-col collapse to 1-col */
+  .hero-split {
+    grid-template-columns: 1fr;
+  }
+  .hero-photo {
+    border-right: none;
+    border-bottom: 1px solid var(--b-subtle);
+    padding: 22px 20px;
+  }
+  .hero-bio { padding: 24px 20px; }
+  .bio-name { font-size: 26px; }
+  .cursor-block { height: 28px; }
+
+  /* Footer: ONLY HERE does 3-col collapse to 1-col */
+  .footer-media {
+    grid-template-columns: 1fr;
+  }
+  .media-col {
+    padding: 0 0 18px;
+    border-right: none;
+    border-bottom: 1px solid var(--b-subtle);
+    margin-bottom: 4px;
+  }
+  .media-col:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+
+  /* Other */
+  .proj-grid { grid-template-columns:1fr; }
+  .term-grid { grid-template-columns:1fr; }
+  .skills-pane.on { grid-template-columns:1fr; }
+  .nav-links { display:none; }
+  .nav-links.open {
+    display:flex; flex-direction:column;
+    position:fixed; top:46px; left:0; right:0;
+    background:rgba(6,8,16,0.97); z-index:999;
+    padding:12px 20px; gap:4px;
+    border-bottom:1px solid var(--b-subtle);
+  }
+  .hamburger { display:flex; }
+  .wrap { padding:0 14px; }
+  .footer-top,.footer-media,.footer-bottom { padding-left:14px; padding-right:14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ NAVBAR ══════ -->
+<nav class="navbar">
+  <div class="nav-brand"><em>[~]&nbsp;</em>divyanshi@portfolio:~</div>
+  <div class="nav-sep"></div>
+  <ul class="nav-links" id="navMenu">
+    <li><a href="#about"><span class="nn">[01]</span>about</a></li>
+    <li><a href="#skills"><span class="nn">[02]</span>skills</a></li>
+    <li><a href="#projects"><span class="nn">[03]</span>projects</a></li>
+    <li><a href="#experience"><span class="nn">[04]</span>experience</a></li>
+    <li><a href="#contact"><span class="nn">[05]</span>contact</a></li>
+  </ul>
+  <div class="status-dot" title="Open to opportunities"></div>
+  <button class="hamburger" onclick="toggleNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="page">
+
+<!-- ══════ HERO — LEFT: PHOTO | RIGHT: BIO ══════ -->
+<section class="hero-section" id="about">
+  <div class="wrap">
+    <div class="win glow win-enter">
+
+      <div class="chrome">
+        <div class="dots">
+          <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+        </div>
+        <div class="chrome-title">divyanshi@portfolio:~$ cat about_me.txt</div>
+        <div class="chrome-badge">bash — 80×24</div>
+      </div>
+
+      <!-- 2-COLUMN SPLIT — fixed grid, never stacks above 640px -->
+      <div class="hero-split">
+
+        <!-- LEFT: Profile Photo -->
+        <div class="hero-photo">
+          <div class="photo-wrap">
+            <div class="photo-label">// profile.jpg</div>
+            <div class="photo-box">
+              <div class="photo-interior">
+                <div class="photo-avatar">👩‍💻</div>
+                <div class="photo-hint">
+                  Divyanshi Vashistha<br>
+                  <span style="color:var(--t4);font-size:8.5px;">[ add profile.jpg to /public ]</span>
+                </div>
+              </div>
+              <div class="photo-status">
+                <div class="blink-dot"></div>
+                &gt;&nbsp;status: ready to build
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Bio, Name, CTAs -->
+        <div class="hero-bio">
+
+          <!-- IBM Plex Mono breadcrumb -->
+          <div class="bio-crumb">
+            <span class="pr">divyanshi@portfolio:~$</span>
+            <span style="color:var(--cyan);">cat about_me.txt</span>
+          </div>
+
+          <!-- Space Grotesk H1 -->
+          <h1 class="bio-name">
+            Hi, I'm Divyanshi<span class="cursor-block"></span>
+          </h1>
+
+          <!-- Space Grotesk tagline -->
+          <p class="bio-tagline">
+            AI<span class="x">×</span>Systems<span class="x">×</span>Product
+          </p>
+
+          <!-- IBM Plex Mono body -->
+          <p class="bio-desc">
+            I build intelligent systems that solve real problems.<br>
+            Currently exploring the intersection of AI, systems and<br>
+            user-centric product design — shipping things that matter.
+          </p>
+
+          <!-- Space Grotesk badge -->
+          <div class="otw">
+            <div class="blink-dot"></div>
+            Open to new opportunities
+          </div>
+
+          <!-- Space Grotesk buttons -->
+          <div class="cta-row">
+            <a href="#projects" class="btn btn-primary">&gt;_ View Projects</a>
+            <a href="/Divyanshi_Vashistha_Resume.pdf" download class="btn btn-sec">↓ Resume</a>
+            <a href="https://github.com/divyanshi" target="_blank" rel="noopener" class="btn btn-sec">⌥ GitHub</a>
+            <a href="https://linkedin.com/in/divyanshi-vashistha" target="_blank" rel="noopener" class="btn btn-ghost">◈ LinkedIn</a>
+            <a href="mailto:divyanshivashistha@gmail.com" class="btn btn-ghost">✉ Contact</a>
+          </div>
+
+        </div><!-- /hero-bio -->
+      </div><!-- /hero-split -->
+    </div><!-- /win -->
+  </div>
+</section>
+
+<!-- ══════ TERMINAL / TABS ══════ -->
+<section class="terminal-section" id="skills">
+  <div class="wrap">
+    <div class="win dim" id="termWin">
+
+      <!-- Tab bar — Space Grotesk labels -->
+      <div class="tab-bar">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="tab on"  data-tab="terminal"   onclick="switchTab(this,'terminal')">▶ terminal <span class="tab-pip"></span></div>
+        <div class="tab"     data-tab="skills"     onclick="switchTab(this,'skills')">skills</div>
+        <div class="tab"     data-tab="experience" onclick="switchTab(this,'experience')">experience</div>
+        <div class="tab"     data-tab="education"  onclick="switchTab(this,'education')">education</div>
+      </div>
+
+      <!-- TAB: Terminal -->
+      <div id="tab-terminal">
+        <div class="term-grid">
+
+          <!-- Pane: whoami -->
+          <div class="term-pane">
+            <div class="pane-head">// whoami</div>
+            <div class="pane-body">
+              <span class="t-ln"><span class="t-p">divyanshi@portfolio:~$</span> <span class="t-c">whoami</span></span>
+              <span class="t-o">&gt; Full-stack builder.</span>
+              <span class="t-o">&gt; Problem solver.</span>
+              <span class="t-o">&gt; Coffee enthusiast.</span>
+              <span class="t-sp"></span>
+              <span class="t-ln"><span class="t-p">divyanshi@portfolio:~$</span> <span class="t-c">status</span></span>
+              <span class="t-o"><span style="color:var(--green)">●</span> <span class="t-v">available</span></span>
+              <span class="t-o"><span class="t-d">location: </span><span class="t-v">India 🇮🇳</span></span>
+              <span class="t-o"><span class="t-d">mode: </span><span class="t-c">building</span></span>
+              <span class="t-sp"></span>
+              <span class="t-ln"><span class="t-p">divyanshi@portfolio:~$</span> <span class="t-c">focus</span></span>
+              <span class="t-o">AI × Systems × Product</span>
+            </div>
+          </div>
+
+          <!-- Pane: quick_nav -->
+          <div class="term-pane">
+            <div class="pane-head">// quick_nav</div>
+            <div class="pane-body">
+              <span class="t-d t-ln" style="margin-bottom:8px;display:block;">// click to execute</span>
+              <button class="cmd-btn" onclick="execCmd('projects')"><span class="sign">$</span><span class="lbl">projects</span></button>
+              <button class="cmd-btn" onclick="execCmd('skills')"><span class="sign">$</span><span class="lbl">skills</span></button>
+              <button class="cmd-btn" onclick="execCmd('contact')"><span class="sign">$</span><span class="lbl">contact</span></button>
+              <button class="cmd-btn" onclick="execCmd('ventures')"><span class="sign">$</span><span class="lbl">ventures</span></button>
+              <button class="cmd-btn" onclick="execCmd('vibes')"><span class="sign">$</span><span class="lbl">vibes</span></button>
+              <button class="cmd-btn" onclick="execCmd('resume')"><span class="sign">$</span><span class="lbl">resume</span></button>
+            </div>
+          </div>
+
+          <!-- Pane: output -->
+          <div class="term-pane">
+            <div class="pane-head">// output</div>
+            <div id="termOutput">
+              <span class="t-d t-ln">// Welcome — type or click a command</span>
+              <span class="t-sp"></span>
+              <span class="t-ln"><span class="t-p">divyanshi@portfolio:~$</span> <span class="t-c">help</span></span>
+              <pre class="t-o" style="margin-top:4px;">
+available commands:
+  <span class="t-k">help</span>       show this menu
+  <span class="t-k">about</span>      about &amp; focus areas
+  <span class="t-k">projects</span>   featured projects
+  <span class="t-k">skills</span>     technical skills
+  <span class="t-k">contact</span>    contact channels
+  <span class="t-k">ventures</span>   side quests
+  <span class="t-k">vibes</span>      music, films &amp; books
+  <span class="t-k">resume</span>     download resume
+  <span class="t-k">clear</span>      clear terminal</pre>
+            </div>
+            <div class="term-input-row">
+              <span class="prmt">divyanshi@portfolio:~$</span>
+              <input type="text" id="termInput" placeholder="type a command..." autocomplete="off" spellcheck="false">
+              <div class="term-cursor"></div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /tab-terminal -->
+
+      <!-- TAB: Skills -->
+      <div id="tab-skills" class="skills-pane">
+        <div>
+          <div class="sk-head">AI &amp; ML</div>
+          <div class="sk-row"><span class="sk-lbl">LLMs / RAG</span><div class="sk-track"><div class="sk-fill" style="width:92%"></div></div><span class="sk-pct">92%</span></div>
+          <div class="sk-row"><span class="sk-lbl">Fine-tuning</span><div class="sk-track"><div class="sk-fill" style="width:82%"></div></div><span class="sk-pct">82%</span></div>
+          <div class="sk-row"><span class="sk-lbl">AI Safety</span><div class="sk-track"><div class="sk-fill" style="width:78%"></div></div><span class="sk-pct">78%</span></div>
+          <div class="sk-row"><span class="sk-lbl">CV / Vision</span><div class="sk-track"><div class="sk-fill" style="width:72%"></div></div><span class="sk-pct">72%</span></div>
+        </div>
+        <div>
+          <div class="sk-head">Systems &amp; Backend</div>
+          <div class="sk-row"><span class="sk-lbl">Distributed</span><div class="sk-track"><div class="sk-fill" style="width:86%"></div></div><span class="sk-pct">86%</span></div>
+          <div class="sk-row"><span class="sk-lbl">Cryptography</span><div class="sk-track"><div class="sk-fill" style="width:76%"></div></div><span class="sk-pct">76%</span></div>
+          <div class="sk-row"><span class="sk-lbl">Node.js</span><div class="sk-track"><div class="sk-fill" style="width:89%"></div></div><span class="sk-pct">89%</span></div>
+          <div class="sk-row"><span class="sk-lbl">Python</span><div class="sk-track"><div class="sk-fill" style="width:91%"></div></div><span class="sk-pct">91%</span></div>
+        </div>
+        <div>
+          <div class="sk-head">Frontend &amp; DevOps</div>
+          <div class="sk-row"><span class="sk-lbl">React / TS</span><div class="sk-track"><div class="sk-fill" style="width:91%"></div></div><span class="sk-pct">91%</span></div>
+          <div class="sk-row"><span class="sk-lbl">Next.js</span><div class="sk-track"><div class="sk-fill" style="width:84%"></div></div><span class="sk-pct">84%</span></div>
+          <div class="sk-row"><span class="sk-lbl">Docker / K8s</span><div class="sk-track"><div class="sk-fill" style="width:75%"></div></div><span class="sk-pct">75%</span></div>
+          <div class="sk-row"><span class="sk-lbl">PostgreSQL</span><div class="sk-track"><div class="sk-fill" style="width:88%"></div></div><span class="sk-pct">88%</span></div>
+        </div>
+      </div>
+
+      <!-- TAB: Experience -->
+      <div id="tab-experience" class="exp-pane">
+        <div class="exp-card"><div class="exp-role">AI Systems Engineer</div><div class="exp-org">TrustLayer AI — Stealth Startup</div><div class="exp-period">2024 — Present</div><div class="exp-desc">Cryptographic verification systems for AI outputs. Zero-knowledge proof frameworks for model attestation at scale.</div></div>
+        <div class="exp-card"><div class="exp-role">Full-Stack Engineer</div><div class="exp-org">ResQNet</div><div class="exp-period">2023 — 2024</div><div class="exp-desc">Decentralized emergency response network. Consensus mechanisms and fault-tolerant mesh coordination.</div></div>
+        <div class="exp-card"><div class="exp-role">Product Designer &amp; Developer</div><div class="exp-org">SkinSoul AI</div><div class="exp-period">2023</div><div class="exp-desc">End-to-end product design for AI skin analysis. CV models integrated into mobile-first React Native experience.</div></div>
+        <div class="exp-card"><div class="exp-role">Open Source Contributor</div><div class="exp-org">AI Safety &amp; Distributed Systems</div><div class="exp-period">2022 — Present</div><div class="exp-desc">AI safety tooling, distributed systems libraries, and consensus protocol implementations.</div></div>
+      </div>
+
+      <!-- TAB: Education -->
+      <div id="tab-education" class="edu-pane">
+        <div class="exp-card"><div class="exp-role">B.Tech — Computer Science &amp; Engineering</div><div class="exp-org">University of Engineering</div><div class="exp-period">2021 — 2025</div><div class="exp-desc">Focus: AI/ML, Distributed Systems, Cryptography, Product Development. Active researcher and open-source builder.</div></div>
+        <div class="exp-card"><div class="exp-role">Self-directed Learning</div><div class="exp-org">Coursera · fast.ai · MIT OpenCourseWare</div><div class="exp-period">Ongoing</div><div class="exp-desc">Deep learning specialization, distributed systems, security engineering, and product strategy.</div></div>
+      </div>
+
+    </div><!-- /win -->
+  </div>
+</section>
+
+<!-- ══════ PROJECTS ══════ -->
+<section class="proj-section" id="projects">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-label">// featured_projects</span>
+      <div class="sec-line"></div>
+      <span class="sec-hint">ls -la ~/projects/</span>
+    </div>
+    <div class="proj-grid">
+
+      <div class="proj-card appear ap1">
+        <div class="proj-num">01 / skinsoul_ai</div>
+        <div class="proj-name">SKINSOUL AI</div>
+        <div class="proj-desc">AI-powered skin analysis and personalized skincare recommendations using computer vision and ML models. Mobile-first UX.</div>
+        <div class="proj-tags"><span class="tag tag-g">Computer Vision</span><span class="tag tag-c">React Native</span><span class="tag tag-p">PyTorch</span></div>
+        <span class="proj-arrow">↗</span>
+      </div>
+
+      <div class="proj-card appear ap2">
+        <div class="proj-num">02 / civicpulse</div>
+        <div class="proj-name">CIVICPULSE</div>
+        <div class="proj-desc">Real-time civic engagement platform connecting citizens with governance initiatives via live data streams and push alerts.</div>
+        <div class="proj-tags"><span class="tag tag-c">Next.js</span><span class="tag tag-a">PostgreSQL</span><span class="tag tag-g">Redis</span></div>
+        <span class="proj-arrow">↗</span>
+      </div>
+
+      <div class="proj-card appear ap3">
+        <div class="proj-num">03 / resqnet</div>
+        <div class="proj-name">RESQNET</div>
+        <div class="proj-desc">Decentralized emergency response network for disaster management using distributed consensus and fault-tolerant mesh architecture.</div>
+        <div class="proj-tags"><span class="tag tag-p">Distributed</span><span class="tag tag-g">Node.js</span><span class="tag tag-c">WebRTC</span></div>
+        <span class="proj-arrow">↗</span>
+      </div>
+
+      <div class="proj-card appear ap1">
+        <div class="proj-num">04 / meshchain</div>
+        <div class="proj-name">MESHCHAIN</div>
+        <div class="proj-desc">Distributed mesh network infrastructure for resilient connectivity in areas with limited or zero existing internet infrastructure.</div>
+        <div class="proj-tags"><span class="tag tag-a">Rust</span><span class="tag tag-g">P2P</span><span class="tag tag-p">Cryptography</span></div>
+        <span class="proj-arrow">↗</span>
+      </div>
+
+      <div class="proj-card appear ap2">
+        <div class="proj-num">05 / trustlayer_ai</div>
+        <div class="proj-name">TRUSTLAYER AI</div>
+        <div class="proj-desc">Cryptographic trust framework for verifiable AI systems using zero-knowledge proofs, model attestation, and on-chain verification.</div>
+        <div class="proj-tags"><span class="tag tag-g">ZK Proofs</span><span class="tag tag-c">AI Safety</span><span class="tag tag-p">Solidity</span></div>
+        <span class="proj-arrow">↗</span>
+      </div>
+
+      <div class="proj-card proj-empty appear ap3">
+        <div class="plus">+</div>
+        <div style="font-family:var(--f-mono);font-size:10.5px;color:var(--t3);">more on github</div>
+        <a href="https://github.com/divyanshi" target="_blank" rel="noopener">→ github.com/divyanshi</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════ EXPERIENCE ══════ -->
+<section class="exp-section" id="experience">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-label">// experience</span>
+      <div class="sec-line"></div>
+      <span class="sec-hint">cat ~/experience.log</span>
+    </div>
+    <div class="exp-grid">
+      <div class="exp-card"><div class="exp-role">AI Systems Engineer</div><div class="exp-org">TrustLayer AI</div><div class="exp-period">2024 — Present</div><div class="exp-desc">Cryptographic verification systems for AI outputs. ZK proof frameworks for model attestation at scale.</div></div>
+      <div class="exp-card"><div class="exp-role">Full-Stack Engineer</div><div class="exp-org">ResQNet</div><div class="exp-period">2023 — 2024</div><div class="exp-desc">Decentralized emergency response network. Consensus mechanisms and fault-tolerant mesh coordination.</div></div>
+      <div class="exp-card"><div class="exp-role">Product Designer &amp; Developer</div><div class="exp-org">SkinSoul AI</div><div class="exp-period">2023</div><div class="exp-desc">End-to-end product design for AI skin analysis. CV models integrated into mobile-first UX.</div></div>
+      <div class="exp-card"><div class="exp-role">Open Source Contributor</div><div class="exp-org">AI Safety &amp; Distributed Systems</div><div class="exp-period">2022 — Present</div><div class="exp-desc">AI safety tooling, distributed systems libraries, and consensus protocol implementations.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     FOOTER
+     3-COL HORIZONTAL PANEL — ENFORCED
+     LEFT: Spotify   CENTRE: Letterboxd   RIGHT: StoryGraph
+     Stacks vertically ONLY below 640px
+══════════════════════════════════════════════════════════ -->
+<footer class="footer" id="contact">
+
+  <div class="footer-top">
+    <span class="footer-brand">divyanshi@portfolio</span>
+    <div class="footer-rule"></div>
+    <span class="footer-tip">^ tip: try <em>'about'</em>, <em>'skills'</em>, <em>'projects'</em>, <em>'contact'</em></span>
+    <div class="footer-rule2"></div>
+    <span class="footer-code">&lt;/&gt; code by divyanshi</span>
+  </div>
+
+  <!-- 3-COL GRID — grid-template-columns: 1fr 1fr 1fr — never overridden above 640px -->
+  <div class="footer-media">
+
+    <!-- COL 1: Spotify -->
+    <div class="media-col">
+      <div class="media-col-head">
+        <span class="media-icon">🎵</span>
+        <span class="media-col-head-text">Spotify Favourites</span>
+      </div>
+      <div class="mi"><div class="mi-cover mc-s1">🎤</div><div class="mi-info"><div class="mi-title">Blinding Lights</div><div class="mi-meta">The Weeknd · 3:20</div></div><span class="mi-play">▶</span></div>
+      <div class="neon-hr"></div>
+      <div class="mi"><div class="mi-cover mc-s2">🎵</div><div class="mi-info"><div class="mi-title">Levitating</div><div class="mi-meta">Dua Lipa · 3:23</div></div><span class="mi-play">▶</span></div>
+      <div class="neon-hr"></div>
+      <div class="mi"><div class="mi-cover mc-s3">🎶</div><div class="mi-info"><div class="mi-title">Good As Hell</div><div class="mi-meta">Lizzo · 3:07</div></div><span class="mi-play">▶</span></div>
+      <div class="neon-hr"></div>
+      <div class="mi"><div class="mi-cover mc-s4">🎸</div><div class="mi-info"><div class="mi-title">Industry Baby</div><div class="mi-meta">Lil Nas X · 3:45</div></div><span class="mi-play">▶</span></div>
+    </div>
+
+    <!-- COL 2: Letterboxd -->
+    <div class="media-col">
+      <div class="media-col-head">
+        <span class="media-icon">🎬</span>
+        <span class="media-col-head-text">Recent Letterboxd</span>
+      </div>
+      <div class="mi"><div class="mi-cover mc-l1">🏜️</div><div class="mi-info"><div class="mi-title">Dune: Part Two</div><div class="mi-meta">2024 · Denis Villeneuve</div></div><span class="mi-stars">★★★★★</span></div>
+      <div class="neon-hr"></div>
+      <div class="mi"><div class="mi-cover mc-l2">🌑</div><div class="mi-info"><div class="mi-title">Killers of the Flower Moon</div><div class="mi-meta">2023 · Martin Scorsese</div></div><span class="mi-stars">★★★★</span></div>
+      <div class="neon-hr"></div>
+      <div class="mi"><div class="mi-cover mc-l3">⚛️</div><div class="mi-info"><div class="mi-title">Oppenheimer</div><div class="mi-meta">2023 · Christopher Nolan</div></div><span class="mi-stars">★★★★★</span></div>
+      <div class="neon-hr"></div>
+      <div class="mi"><div class="mi-cover mc-l4">🏠</div><div class="mi-info"><div class="mi-title">Zone of Interest</div><div class="mi-meta">2023 · Jonathan Glazer</div></div><span class="mi-stars">★★★★</span></div>
+    </div>
+
+    <!-- COL 3: StoryGraph -->
+    <div class="media-col">
+      <div class="media-col-head">
+        <span class="media-icon">📚</span>
+        <span class="media-col-head-text">Currently Reading</span>
+      </div>
+      <div class="mi"><div class="mi-cover mc-b1">🤖</div><div class="mi-info"><div class="mi-title">Superintelligence</div><div class="mi-meta">Nick Bostrom</div><div class="bk-bar"><div class="bk-fill" style="width:65%"></div></div></div><span class="mi-pct">65%</span></div>
+      <div class="neon-hr"></div>
+      <div class="mi"><div class="mi-cover mc-b2">🧠</div><div class="mi-info"><div class="mi-title">Design of Everyday Things</div><div class="mi-meta">Don Norman</div><div class="bk-bar"><div class="bk-fill" style="width:45%"></div></div></div><span class="mi-pct">45%</span></div>
+      <div class="neon-hr"></div>
+      <div class="mi"><div class="mi-cover mc-b3">🌌</div><div class="mi-info"><div class="mi-title">A Brief History of Time</div><div class="mi-meta">Stephen Hawking</div><div class="bk-bar"><div class="bk-fill" style="width:80%"></div></div></div><span class="mi-pct">80%</span></div>
+    </div>
+
+  </div><!-- /footer-media -->
+
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 Divyanshi Vashistha · Built with ❤️ and ☕</span>
+    <div class="footer-links">
+      <a href="https://github.com/divyanshi" target="_blank" rel="noopener" class="footer-link">⌥ GitHub</a>
+      <a href="https://linkedin.com/in/divyanshi-vashistha" target="_blank" rel="noopener" class="footer-link">◈ LinkedIn</a>
+      <a href="mailto:divyanshivashistha@gmail.com" class="footer-link">✉ Email</a>
+      <a href="/Divyanshi_Vashistha_Resume.pdf" download class="footer-link">&lt;/&gt; Resume</a>
+    </div>
+  </div>
+
+</footer>
+
+</div><!-- /page -->
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   TERMINAL LOGIC
+══════════════════════════════════════════════════════════ */
+const CMDS = {
+  help:`<span class="t-d">┌─ AVAILABLE COMMANDS ─────────────────────┐</span>
+<span class="t-d">│</span>  <span class="t-k">help</span>       show this menu
+<span class="t-d">│</span>  <span class="t-k">about</span>      about &amp; focus areas
+<span class="t-d">│</span>  <span class="t-k">projects</span>   featured projects
+<span class="t-d">│</span>  <span class="t-k">skills</span>     technical skills
+<span class="t-d">│</span>  <span class="t-k">contact</span>    contact channels
+<span class="t-d">│</span>  <span class="t-k">ventures</span>   side quests
+<span class="t-d">│</span>  <span class="t-k">vibes</span>      music, films &amp; books
+<span class="t-d">│</span>  <span class="t-k">resume</span>     download resume
+<span class="t-d">│</span>  <span class="t-k">clear</span>      clear terminal
+<span class="t-d">└──────────────────────────────────────────┘</span>`,
+
+  about:`<span class="t-c">// About Divyanshi Vashistha</span>
+<span class="t-d">───────────────────────────────────────────</span>
+Building at the intersection of AI, systems &amp; product.
+
+<span class="t-k">Focus Areas:</span>
+  <span class="t-v">•</span> Trustworthy AI Systems &amp; Safety
+  <span class="t-v">•</span> Distributed Systems &amp; Consensus
+  <span class="t-v">•</span> Cryptography &amp; Security
+  <span class="t-v">•</span> Product-Market Fit &amp; Design
+  <span class="t-v">•</span> System Design at Scale
+
+<span class="t-d">// Currently: making AI transparent &amp; verifiable.</span>`,
+
+  projects:`<span class="t-c">// Featured Projects</span>
+<span class="t-d">───────────────────────────────────────────</span>
+<span class="t-k">01</span> <span class="t-v">SKINSOUL AI</span>    — CV · React Native · PyTorch
+<span class="t-k">02</span> <span class="t-v">CIVICPULSE</span>     — Next.js · PostgreSQL · Real-time
+<span class="t-k">03</span> <span class="t-v">RESQNET</span>        — Distributed · Consensus · WebRTC
+<span class="t-k">04</span> <span class="t-v">MESHCHAIN</span>      — Rust · P2P · Cryptography
+<span class="t-k">05</span> <span class="t-v">TRUSTLAYER AI</span>  — ZK Proofs · AI Safety · Solidity
+
+<span class="t-d">// Scroll down for detailed cards ↓</span>`,
+
+  skills:`<span class="t-c">// Technical Skills</span>
+<span class="t-d">───────────────────────────────────────────</span>
+<span class="t-k">AI/ML:</span>      LLMs, RAG, Fine-tuning, CV, Safety
+<span class="t-k">Systems:</span>    Distributed, Cryptography, Protocols
+<span class="t-k">Backend:</span>    Node.js, Python, Go, Rust, PostgreSQL
+<span class="t-k">Frontend:</span>   React, Next.js, TypeScript, Tailwind
+<span class="t-k">DevOps:</span>     Docker, Kubernetes, AWS, CI/CD
+
+<span class="t-d">// Click 'skills' tab for proficiency bars ↑</span>`,
+
+  contact:`<span class="t-c">// Contact Channels</span>
+<span class="t-d">───────────────────────────────────────────</span>
+<span class="t-k">📧 EMAIL</span>
+   <a href="mailto:divyanshivashistha@gmail.com" style="color:var(--cyan);text-decoration:none;">divyanshivashistha@gmail.com</a>
+
+<span class="t-k">💼 LINKEDIN</span>
+   <a href="https://linkedin.com/in/divyanshi-vashistha" target="_blank" style="color:var(--cyan);text-decoration:none;">linkedin.com/in/divyanshi-vashistha</a>
+
+<span class="t-k">💻 GITHUB</span>
+   <a href="https://github.com/divyanshi" target="_blank" style="color:var(--cyan);text-decoration:none;">github.com/divyanshi</a>
+
+<span class="t-d">// Open to collaborations &amp; new opportunities</span>`,
+
+  ventures:`<span class="t-c">// Current Ventures</span>
+<span class="t-d">───────────────────────────────────────────</span>
+<span class="t-k">🔐 AI Trust Framework</span>          <span style="color:var(--green)">active</span>
+   Cryptographic verification for trustworthy AI
+
+<span class="t-k">🔗 Distributed Systems Research</span> <span style="color:var(--green)">active</span>
+   Consensus &amp; fault tolerance in mesh networks
+
+<span class="t-k">🚀 Open Source Contributions</span>    <span style="color:var(--green)">active</span>
+   AI safety &amp; distributed systems
+
+<span class="t-k">🎯 Product Strategy Mentorship</span>  <span style="color:var(--amber)">exploring</span>
+   Helping founders with PMF`,
+
+  vibes:`<span class="t-c">// Vibes &amp; Culture</span>
+<span class="t-d">───────────────────────────────────────────</span>
+<span class="t-k">🎵 Spotify:</span>  Blinding Lights · Levitating · Good As Hell
+<span class="t-k">🎬 Films:</span>   Dune Part Two · Oppenheimer · Zone of Interest
+<span class="t-k">📚 Reading:</span> Superintelligence · Design of Everyday Things
+
+<span class="t-d">// See footer media panel ↓</span>`,
+
+  resume:`<span class="t-c">// Downloading resume...</span>
+<span class="t-d">───────────────────────────────────────────</span>
+<span class="t-v">→</span> Divyanshi_Vashistha_Resume.pdf
+<span class="t-d">// Starting download...</span>`,
+};
+
+const out  = document.getElementById('termOutput');
+const inp  = document.getElementById('termInput');
+let hist   = [];
+let hIdx   = -1;
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function push(cmd, html){
+  const r = document.createElement('div');
+  r.style.cssText = 'display:block;margin-bottom:2px;';
+  r.innerHTML = `<span class="t-p">divyanshi@portfolio:~$</span> <span class="t-c">${esc(cmd)}</span>`;
+  out.appendChild(r);
+  const p = document.createElement('pre');
+  p.className = 't-o';
+  p.style.cssText = 'margin:3px 0 8px;line-height:1.75;font-size:11px;font-family:var(--f-mono);white-space:pre-wrap;';
+  p.innerHTML = html;
+  out.appendChild(p);
+  out.scrollTop = out.scrollHeight;
+}
+
+function execCmd(raw){
+  const cmd = raw.toLowerCase().trim();
+  if(!cmd) return;
+  hist.unshift(cmd); hIdx = -1;
+  if(cmd === 'clear'){
+    out.innerHTML = '<span class="t-d" style="display:block;">// Terminal cleared.</span>';
+    return;
+  }
+  if(cmd === 'resume'){
+    push(cmd, CMDS.resume);
+    setTimeout(()=>{ const a=document.createElement('a'); a.href='/Divyanshi_Vashistha_Resume.pdf'; a.download='Divyanshi_Vashistha_Resume.pdf'; a.click(); }, 500);
+    return;
+  }
+  const html = CMDS[cmd] || `<span style="color:var(--red)">bash: ${esc(cmd)}: command not found</span>\n<span class="t-d">Type 'help' for available commands.</span>`;
+  push(cmd, html);
+}
+
+inp.addEventListener('keydown', e=>{
+  if(e.key==='Enter'){ const v=inp.value.trim(); if(v){ execCmd(v); inp.value=''; } }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); if(hIdx<hist.length-1) inp.value=hist[++hIdx]||''; }
+  else if(e.key==='ArrowDown'){ e.preventDefault(); hIdx>0?(inp.value=hist[--hIdx]||''):(hIdx=-1,inp.value=''); }
+});
+
+document.getElementById('termWin').addEventListener('click', ()=>inp.focus());
+
+/* ══════════════════════════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════════════════════════ */
+function switchTab(el, name){
+  // Hide all panels
+  document.getElementById('tab-terminal').style.display = 'none';
+  document.querySelectorAll('.skills-pane, .exp-pane, .edu-pane').forEach(p=>{ p.style.display='none'; p.classList.remove('on'); });
+  // Deactivate all tabs
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  if(name === 'terminal'){
+    document.getElementById('tab-terminal').style.display = '';
+  } else if(name === 'skills'){
+    const p = document.getElementById('tab-skills');
+    p.style.display = ''; p.classList.add('on');
+  } else if(name === 'experience'){
+    const p = document.getElementById('tab-experience');
+    p.style.display = ''; p.classList.add('on');
+  } else if(name === 'education'){
+    const p = document.getElementById('tab-education');
+    p.style.display = ''; p.classList.add('on');
+  }
+}
+
+// Init: hide non-terminal panels
+document.querySelectorAll('.skills-pane,.exp-pane,.edu-pane').forEach(p=>p.style.display='none');
+
+/* Mobile nav */
+function toggleNav(){
+  document.getElementById('navMenu').classList.toggle('open');
+}
+
+/* Smooth scroll */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); document.getElementById('navMenu').classList.remove('open'); }
+  });
+});
+
+/* Boot */
+setTimeout(()=>execCmd('whoami'), 400);
+</script>
+
+</body>
+</html>
